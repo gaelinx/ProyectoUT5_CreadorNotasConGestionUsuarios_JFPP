@@ -1,3 +1,6 @@
+/**
+ * Clase Modelo de la aplicación encargada de la logica inicial.
+ */
 package com.Modelo;
 
 import java.io.*;
@@ -7,22 +10,34 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.Base64;
 
 public class Modelo {
-    // Constantes
+    /** Nombre del archivo que almacena los usuarios registrados */
     private static final String ARCHIVO_USUARIOS = "usuarios.csv";
+    /** Directorio base donde se almacenan los datos de la aplicación, en este caso se guarda de manera generica en el Disco Local D */
     private static final String DIRECTORIO_BASE = "D:";
+    /** Nombre del directorio que contiene los usuarios */
     private static final String DIRECTORIO_USUARIOS = "Usuarios";
+    /** Nombre del directorio que contiene las notas de cada usuario */
     private static final String DIRECTORIO_NOTAS = "Notas";
 
-    // Variables
+    /** Mapa que almacena las notas del usuario actual en memoria */
     private final Map<String, String> notas;
+    /** Correo del usuario actualmente autenticado */
     private String usuarioActual;
 
+    /**
+     * Constructor que inicializa la estructura de directorios y el mapa de notas.
+     */
     public Modelo() {
         this.notas = new HashMap<>();
         inicializarEstructura();
     }
 
-    //Métodos de Autenticación
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * @param correo Correo electrónico del usuario (debe ser único)
+     * @param contraseña Contraseña del usuario (será hasheada)
+     * @return true si el registro fue exitoso, false si el usuario ya existe o hubo error
+     */
     public boolean registrarUsuario(String correo, String contraseña) {
         if (usuarioExiste(correo)) return false;
 
@@ -44,6 +59,12 @@ public class Modelo {
         }
     }
 
+    /**
+     * Autentica a un usuario en el sistema.
+     * @param correo Correo electrónico del usuario
+     * @param contraseña Contraseña proporcionada
+     * @return true si las credenciales son válidas, false en caso contrario
+     */
     public boolean autenticarUsuario(String correo, String contraseña) {
         Path rutaArchivo = Paths.get(DIRECTORIO_BASE, DIRECTORIO_USUARIOS, ARCHIVO_USUARIOS);
 
@@ -64,13 +85,22 @@ public class Modelo {
         return false;
     }
 
-    // Hash
+    /**
+     * Genera un salt aleatorio para hashing de contraseñas.
+     * @return String con el salt codificado en Base64
+     */
     private String generarSalt() {
         byte[] saltBytes = new byte[16];
         ThreadLocalRandom.current().nextBytes(saltBytes);
         return Base64.getEncoder().encodeToString(saltBytes);
     }
 
+    /**
+     * Genera un hash de la contraseña usando el algoritmo DJB2.
+     * @param input Contraseña a hashear
+     * @param salt Valor salt para aumentar seguridad
+     * @return String con el hash resultante (64 caracteres hexadecimales)
+     */
     private String hash(String input, String salt) {
         long hash = 5381L;
         String saltedInput = salt + input;
@@ -88,6 +118,9 @@ public class Modelo {
         return result.toString();
     }
 
+    /**
+     * Inicializa la estructura de directorios necesaria para la aplicación.
+     */
     private void inicializarEstructura() {
         crearDirectoriosBase();
         if (!Files.exists(Paths.get(DIRECTORIO_BASE, DIRECTORIO_USUARIOS, ARCHIVO_USUARIOS))) {
@@ -99,6 +132,9 @@ public class Modelo {
         }
     }
 
+    /**
+     * Crea los directorios base si no existen.
+     */
     private void crearDirectoriosBase() {
         try {
             Files.createDirectories(Paths.get(DIRECTORIO_BASE, DIRECTORIO_USUARIOS));
@@ -107,6 +143,11 @@ public class Modelo {
         }
     }
 
+    /**
+     * Verifica si un usuario ya está registrado.
+     * @param correo Correo electrónico a verificar
+     * @return true si el usuario existe, false en caso contrario
+     */
     private boolean usuarioExiste(String correo) {
         Path rutaArchivo = Paths.get(DIRECTORIO_BASE, DIRECTORIO_USUARIOS, ARCHIVO_USUARIOS);
         try (BufferedReader reader = Files.newBufferedReader(rutaArchivo)) {
@@ -117,6 +158,11 @@ public class Modelo {
         }
     }
 
+    /**
+     * Crea el directorio personal para un usuario.
+     * @param correo Correo del usuario
+     * @return true si se creó exitosamente, false en caso de error
+     */
     private boolean crearDirectorioUsuario(String correo) {
         try {
             Files.createDirectories(obtenerRutaDirectorioNotas(correo));
@@ -127,7 +173,11 @@ public class Modelo {
         }
     }
 
-    // Notas
+    /**
+     * Carga todas las notas de un usuario desde el sistema de archivos.
+     * @param correo Correo del usuario cuyas notas se cargarán
+     * @return Mapa con los títulos y contenidos de las notas
+     */
     public Map<String, String> cargarNotasUsuario(String correo) {
         notas.clear();
         usuarioActual = correo;
@@ -155,6 +205,12 @@ public class Modelo {
         return new HashMap<>(notas);
     }
 
+    /**
+     * Almacena una nueva nota o actualiza una existente.
+     * @param titulo Título de la nota
+     * @param contenido Contenido de la nota
+     * @return true si se guardó exitosamente, false en caso de error
+     */
     public boolean almacenarNotaEnArchivo(String titulo, String contenido) {
         if (usuarioActual == null || titulo.isEmpty()) {
             return false;
@@ -173,6 +229,11 @@ public class Modelo {
         }
     }
 
+    /**
+     * Elimina una nota del sistema.
+     * @param titulo Título de la nota a eliminar
+     * @return true si se eliminó exitosamente, false en caso de error o si no existía
+     */
     public boolean eliminarNota(String titulo) {
         if (usuarioActual == null || titulo == null) {
             return false;
@@ -191,6 +252,11 @@ public class Modelo {
         }
     }
 
+    /**
+     * Filtra las notas por contenido de texto.
+     * @param busqueda Texto a buscar en los títulos de las notas
+     * @return Mapa con las notas que coinciden con la búsqueda
+     */
     public Map<String, String> filtrarNotasPorTexto(String busqueda) {
         Map<String, String> resultados = new HashMap<>();
         if (busqueda == null || busqueda.isEmpty()) {
@@ -207,33 +273,62 @@ public class Modelo {
         return resultados;
     }
 
-    // Utilidades
+    /**
+     * Limpia caracteres inválidos de un nombre de archivo.
+     * @param nombre Nombre original
+     * @return Nombre limpio seguro para usar como archivo
+     */
     private String limpiarNombreArchivo(String nombre) {
         return nombre.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 
+    /**
+     * Obtiene la ruta del directorio de notas de un usuario.
+     * @param correo Correo del usuario
+     * @return Path del directorio de notas
+     */
     private Path obtenerRutaDirectorioNotas(String correo) {
         String correoLimpio = limpiarNombreArchivo(correo);
         return Paths.get(DIRECTORIO_BASE, DIRECTORIO_USUARIOS, correoLimpio, DIRECTORIO_NOTAS);
     }
 
+    /**
+     * Obtiene la ruta completa de una nota.
+     * @param titulo Título de la nota
+     * @return Path completo del archivo de la nota
+     */
     private Path obtenerRutaNota(String titulo) {
         return obtenerRutaDirectorioNotas(usuarioActual).resolve(titulo + ".txt");
     }
 
-    // Getters
+    /**
+     * Obtiene el contenido de una nota específica.
+     * @param titulo Título de la nota
+     * @return Contenido de la nota o null si no existe
+     */
     public String obtenerContenidoNota(String titulo) {
         return notas.get(titulo);
     }
 
+    /**
+     * Obtiene el usuario actualmente autenticado.
+     * @return Correo del usuario o null si no hay sesión activa
+     */
     public String obtenerUsuarioActual() {
         return usuarioActual;
     }
 
+    /**
+     * Establece el usuario actual (de manera interna).
+     * @param usuario Correo del usuario
+     */
     public void establecerUsuarioActual(String usuario) {
         this.usuarioActual = usuario;
     }
 
+    /**
+     * Cierra la sesión actual limpiando los datos en memoria.
+     */
     public void cerrarSesion() {
         usuarioActual = null;
         notas.clear();
