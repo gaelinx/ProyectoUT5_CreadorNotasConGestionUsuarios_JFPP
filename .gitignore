@@ -1,16 +1,10 @@
-# Compiled class file
+# ===============================
+# Archivos compilados y empaquetados
+# ===============================
+# Archivos .class compilados
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Archivos empaquetados (JAR, WAR, EAR, etc.)
 *.jar
 *.war
 *.nar
@@ -19,6 +13,69 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# ===============================
+# Archivos de log y crash
+# ===============================
+# Archivos de log
+*.log
+
+# Crash logs y archivos de volcado de la JVM
 hs_err_pid*
 replay_pid*
+
+# ===============================
+# Archivos específicos de herramientas y entornos
+# ===============================
+# Archivos de BlueJ
+*.ctxt
+
+# Archivos temporales de Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# ===============================
+# Directorios de compilación y construcción
+# ===============================
+# Directorios comunes de compilación
+/bin/
+/build/
+/out/
+/target/
+.gradle/
+
+# ===============================
+# Archivos temporales y generados por el sistema operativo
+# ===============================
+# Archivos temporales, de intercambio, etc.
+*.tmp
+*.swp
+
+# Archivos generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Configuración de IDEs y entornos de desarrollo
+# ===============================
+## IntelliJ IDEA
+/.idea/
+/*.iml
+/*.ipr
+/out/
+
+## NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nbm/
+nbactions.xml
+nb-configuration.xml
+
+## Visual Studio Code
+/.vscode/
+
+# ===============================
+# Otros archivos y configuraciones específicas
+# ===============================
+*.launch
